@@ -153,6 +153,11 @@
         .streak-badge { background: #ffeaa7; color: #d35400; padding: 5px 15px; border-radius: 20px; font-size: 0.9em; display: inline-block; margin-left: 10px;}
 
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .sos-fab { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; background: var(--alert-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .sos-menu { position: absolute; bottom: 70px; right: 0; width: 200px; background: white; padding: 15px; border-radius: 15px; display: none; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        .sos-menu.active { display: block; }
+        .sos-link { display: block; background: #fff1f1; color: var(--alert-red); padding: 10px; border-radius: 10px; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 
@@ -539,9 +544,33 @@ function startApp(){
         }
     });
 }
+
+ // SOS Toggle
+    const fab = document.getElementById("floatingSOS");
+    fab.onclick = (e) => { e.stopPropagation(); document.getElementById("sosMenu").classList.toggle("active"); };
+    document.onclick = () => document.getElementById("sosMenu").classList.remove("active");
+
+    const savedName = localStorage.getItem("currentUser");
+    if (savedName) {
+        currentUserData = { username: savedName, streak: 0, lat: null, lng: null };
+        document.getElementById("logoutBtn").style.display = "block";
+        document.getElementById("logoutBtn").onclick = () => { localStorage.removeItem("currentUser"); location.reload(); };
+        document.getElementById("welcomeText").innerText = `${savedName} 🔥 0`;
+        
+        // Load global data immediately
+        initMap();
+        fetchGlobalData();
+        setupAIVerification();
+        
+        // Auto-refresh every 30 seconds to see other people
+        setInterval(fetchGlobalData, 30000);
+        return;
+    }
+    
 startApp();
 </script>
 
 </body>
 </html>
+
 
