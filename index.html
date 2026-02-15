@@ -545,7 +545,8 @@ function startApp(){
     });
 }
 
- // SOS Toggle
+function startApp() {
+    // SOS Toggle
     const fab = document.getElementById("floatingSOS");
     fab.onclick = (e) => { e.stopPropagation(); document.getElementById("sosMenu").classList.toggle("active"); };
     document.onclick = () => document.getElementById("sosMenu").classList.remove("active");
@@ -566,11 +567,25 @@ function startApp(){
         setInterval(fetchGlobalData, 30000);
         return;
     }
+
+    document.getElementById("loginOverlay").classList.add("active");
+    document.getElementById("joinBtn").onclick = () => {
+        const name = document.getElementById("usernameInput").value.trim();
+        if (!name) return alert("Enter name!");
+        navigator.geolocation.getCurrentPosition(p => {
+            currentUserData = { username: name, streak: 0, lat: p.coords.latitude, lng: p.coords.longitude };
+            localStorage.setItem("currentUser", name);
+            syncMyData();
+            location.reload();
+        }, () => alert("Location required!"));
+    };
+}
     
 startApp();
 </script>
 
 </body>
 </html>
+
 
 
