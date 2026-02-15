@@ -450,12 +450,16 @@ function setupAIVerification() {
             formData.append("photo", this.files[0]);
             
             try {
-                let response = await fetch("https://birdfeeder-vo2i.onrender.com/verify-bird", { method: "POST", body: formData });
+            // UPDATED: Pointing to your stable Hugging Face server
+            let response = await fetch("https://heratofficial-birdfeeder.hf.space/verify-bird", { 
+                method: "POST", 
+                body: formData 
+            });
                 
-                // NEW: Catch Render server crashes (like Out of Memory) before they break the JSON parser
-                if (!response.ok) {
-                    throw new Error(`Render Server crashed (Status ${response.status}). Check Render logs for Out of Memory error!`);
-                }
+            // Check if Hugging Face is awake
+            if (!response.ok) {
+                throw new Error(`Server error (Status ${response.status}). Check if Hugging Face Space is 'Running'!`);
+            }
 
                 let result = await response.json();
                 
@@ -534,4 +538,5 @@ startApp();
 </script>
 
 </body>
+
 </html>
