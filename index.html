@@ -280,263 +280,50 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-let map;
-let feeders = JSON.parse(localStorage.getItem("feeders")) || [];
-let currentUserData = null;
+    const fileInput = document.getElementById('fileInput');
+    const status = document.getElementById('status');
 
-const colorfulBirdIcon = L.divIcon({
-    html: `<div style="background: linear-gradient(135deg, #40916c, #1b4332); width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 2px 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><span style="transform: rotate(45deg); font-size: 16px;">🐦</span></div>`,
-    className: 'custom-pin', iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -38]
-});
+    fileInput.addEventListener('change', async () => {
+        const file = fileInput.files[0];
+        if (!file) return;
 
-const dailyLocations = [
-    { name: "Lakhota Lake", lat: 22.4727, lng: 70.0637, desc: "City Center Waterfowl", color: "#1b4332", fill: "#40916c", radius: 600 },
-    { name: "Khijadiya Bird Sanctuary", lat: 22.5160, lng: 70.1160, desc: "Ramsar Wetland Site", color: "#2980b9", fill: "#3498db", radius: 1000 },
-    { name: "Ranjit Sagar Dam", lat: 22.3800, lng: 70.0800, desc: "Reservoir Birds", color: "#8e44ad", fill: "#9b59b6", radius: 800 },
-    { name: "Rozi Port Wetlands", lat: 22.5450, lng: 70.0350, desc: "Coastal Waders & Flamingos", color: "#d35400", fill: "#e67e22", radius: 900 },
-    { name: "Jogger's Park", lat: 22.4560, lng: 70.0630, desc: "Small Garden Birds & Pigeons", color: "#27ae60", fill: "#2ecc71", radius: 400 }
-];
+        status.innerText = "⏳ AI is scanning for birds...";
+        status.style.color = "#f1c40f";
 
-function getTodayLocation() {
-    let now = new Date();
-    let localEpochMs = now.getTime() - (now.getTimezoneOffset() * 60000);
-    let daysSinceEpoch = Math.floor(localEpochMs / 86400000);
-    let isTomorrow = now.getHours() >= 19;
-    if (isTomorrow) {
-        daysSinceEpoch += 1;
-    }
-    let index = daysSinceEpoch % dailyLocations.length;
-    return { loc: dailyLocations[index], isTomorrow: isTomorrow };
-}
+        // This is the part we fixed! Only one 'formData' now.
+        const formData = new FormData();
+        formData.append('image', file); 
 
-function checkTime() {
-    let now = new Date();
-    let hour = now.getHours();
-    let minute = now.getMinutes();
-    let banner = document.getElementById("timeBanner");
-    let isMorningLive = (hour === 8) || (hour === 9 && minute < 30);
-    let isEveningLive = (hour === 17 && minute >= 30) || (hour === 18);
-    if (isMorningLive || isEveningLive) {
-        banner.className = "day-banner";
-        banner.innerHTML = "🎉 The Gathering is Happening NOW! Go feed the birds and log your streak!";
-        banner.style.background = "#27ae60";
-        banner.style.color = "white";
-    } else if (hour >= 19 || hour < 6) {
-        banner.className = "night-banner";
-        banner.innerHTML = "🌙 The birds are resting! Check the map for tomorrow's location. See you at 8:00 AM!";
-        banner.style.background = "";
-        banner.style.color = "";
-    } else {
-        banner.className = "day-banner";
-        banner.innerHTML = "☀️ Perfect weather for bird feeding! Don't forget to upload your photo for a streak.";
-        banner.style.background = "";
-        banner.style.color = "";
-    }
-}
-
-function initMap(){
-    let locationData = getTodayLocation();
-    let todaySpot = locationData.loc;
-    let dayText = locationData.isTomorrow ? "Tomorrow's" : "Today's";
-    document.getElementById("gatheringHeader").innerText = `📍 ${dayText} Gathering Spot`;
-    document.getElementById("meetingLocationText").innerHTML = `<b>📍 ${todaySpot.name}</b> <br><span style="font-size: 0.85em; color: #555;">(${todaySpot.desc})</span>`;
-    map = L.map('map', { scrollWheelZoom: false }).setView([todaySpot.lat, todaySpot.lng], 13);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }).addTo(map);
-    L.circle([todaySpot.lat, todaySpot.lng], { 
-        color: todaySpot.color, weight: 3, fillColor: todaySpot.fill, fillOpacity: 0.4, radius: todaySpot.radius 
-    }).addTo(map)
-    .bindPopup(`<b style='color: ${todaySpot.color}; font-size: 1.1em;'>📍 ${dayText} Gathering</b><br>${todaySpot.name} (8:00 AM & 5:30 PM)`);
-    updateMarkers();
-}
-
-function updateMarkers(){
-    feeders.forEach(f=>{
-        let streakText = f.streak > 0 ? ` <span style="color:#d35400; font-weight:bold;">🔥 ${f.streak}</span>` : "";
-        let foodText = f.food ? `<br><span style="font-size:0.9em; color:#555;">Feeding: ${f.food}</span>` : "";
-        L.marker([f.lat, f.lng], { icon: colorfulBirdIcon }).addTo(map)
-        .bindPopup(`<b style='color: #1b4332;'>🌿 ${f.username}</b>${streakText}${foodText}`);
-    });
-    
-    document.getElementById("counter").innerText = feeders.length;
-    
-    // CHANGED TO 99+ PER USER REQUEST
-    document.getElementById("offlineCounter").innerText = "99+";
-
-    updateLeaderboard();
-}
-
-function updateLeaderboard() {
-    let list = document.getElementById("leaderboard");
-    list.innerHTML = ""; 
-    let sortedFeeders = [...feeders].sort((a, b) => (b.streak || 0) - (a.streak || 0)).slice(0, 5);
-    if (sortedFeeders.length === 0) {
-        list.innerHTML = "<li style='text-align:center; color:#777;'>No active feeders yet. Be the first!</li>";
-        return;
-    }
-    sortedFeeders.forEach((f, index) => {
-        let li = document.createElement("li");
-        li.className = "leaderboard-item";
-        if (index === 0) li.classList.add("rank-1");
-        else if (index === 1) li.classList.add("rank-2");
-        else if (index === 2) li.classList.add("rank-3");
-        let rankMedal = ["🥇", "🥈", "🥉"][index] || `#${index + 1}`;
-        let streakNum = f.streak || 0;
-        li.innerHTML = `<span>${rankMedal} ${f.username}</span> <span>🔥 ${streakNum} Days</span>`;
-        list.appendChild(li);
-    });
-}
-
-function startTimer(){
-    function updateTimer(){
-        let now = new Date();
-        let morningStart = new Date(); morningStart.setHours(8,0,0,0);
-        let morningEnd = new Date(); morningEnd.setHours(9,30,0,0);
-        let eveningStart = new Date(); eveningStart.setHours(17,30,0,0);
-        let eveningEnd = new Date(); eveningEnd.setHours(19,0,0,0);
-        let targetTime;
-        let label = document.getElementById("meetingLabel");
-        let timerDiv = document.getElementById("timer");
-        if (now >= morningStart && now < morningEnd) {
-            label.innerText = "🟢 Morning Gathering is LIVE!";
-            targetTime = morningEnd;
-        } else if (now >= eveningStart && now < eveningEnd) {
-            label.innerText = "🟢 Evening Gathering is LIVE!";
-            targetTime = eveningEnd;
-        } else if (now < morningStart) {
-            label.innerText = "⏳ Time Left Until Morning Gathering (8:00 AM)";
-            targetTime = morningStart;
-        } else if (now < eveningStart) {
-            label.innerText = "⏳ Time Left Until Evening Gathering (5:30 PM)";
-            targetTime = eveningStart;
-        } else {
-            targetTime = new Date(morningStart); 
-            targetTime.setDate(targetTime.getDate() + 1);
-            label.innerText = "⏳ Time Left Until Tomorrow's Morning Gathering";
-        }
-        let diff = targetTime - now;
-        let h = Math.floor(diff / (1000*60*60));
-        let m = Math.floor((diff % (1000*60*60)) / (1000*60));
-        let s = Math.floor((diff % (1000*60)) / 1000);
-        if ((now >= morningStart && now < morningEnd) || (now >= eveningStart && now < eveningEnd)) {
-            timerDiv.innerHTML = `Ends in: ${h}h : ${m < 10 ? '0'+m : m}m : ${s < 10 ? '0'+s : s}s`;
-            timerDiv.style.background = "linear-gradient(135deg, #e74c3c, #c0392b)";
-        } else {
-            timerDiv.innerHTML = `${h < 10 ? '0'+h : h}h : ${m < 10 ? '0'+m : m}m : ${s < 10 ? '0'+s : s}s`;
-            timerDiv.style.background = "linear-gradient(135deg, var(--forest-light), var(--forest-dark))";
-        }
-    }
-    updateTimer(); setInterval(updateTimer,1000);
-}
-
-function setupAIVerification() {
-    document.getElementById("ai-section").style.display = "block"; 
-    const fileInput = document.getElementById("photoUpload");
-    const statusDiv = document.getElementById("ai-status");
-    const uploadLabel = document.getElementById("uploadLabel");
-    let today = new Date().toDateString();
-    
-    if(currentUserData.lastVerified === today) {
-        uploadLabel.style.display = "none";
-        statusDiv.innerHTML = `<span class="success">✅ Verified for today! Come back tomorrow to keep your streak alive.</span>`;
-        return;
-    }
-
-    fileInput.addEventListener("change", async function() {
-        if(this.files.length > 0) {
-            uploadLabel.style.display = "none"; 
-            statusDiv.innerHTML = `<span class="scanning">🤖 AI is waking up and looking for birds... (This may take up to 50 seconds!)</span>`;
-            
-            let formData = new FormData();
-            formData.append("photo", this.files[0]);
-            
-            try {
-            // UPDATED: Pointing to your stable Hugging Face server
-            let response = await fetch("https://heratofficial-birdfeeder.hf.space/verify-bird", { 
-                method: "POST", 
-                body: formData 
+        try {
+            const response = await fetch("https://heratofficial-birdfeeder.hf.space/verify-bird", {
+                method: "POST",
+                body: formData
             });
-                
-            // Check if Hugging Face is awake
+
+            // Check if the server actually sent back a valid response
             if (!response.ok) {
-                throw new Error(`Server error (Status ${response.status}). Check if Hugging Face Space is 'Running'!`);
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Server Error");
             }
 
-                let result = await response.json();
-                
-                if (result.success) {
-                    currentUserData.streak = (currentUserData.streak || 0) + 1;
-                    currentUserData.lastVerified = today;
-                    let userIndex = feeders.findIndex(f => f.username === currentUserData.username);
-                    if(userIndex !== -1) feeders[userIndex] = currentUserData;
-                    localStorage.setItem("feeders", JSON.stringify(feeders));
-                    statusDiv.innerHTML = `<span class="success">✅ ${result.message}</span>`;
-                    updateWelcomeText(); 
-                    map.eachLayer((layer) => { if (layer instanceof L.Marker) { layer.remove(); } }); 
-                    updateMarkers();
-                } else {
-                    uploadLabel.style.display = "inline-block"; 
-                    statusDiv.innerHTML = `<span style="color:#e74c3c;">❌ ${result.message}</span>`;
-                }
-            } catch (error) {
-                uploadLabel.style.display = "inline-block"; 
-                // NEW: Show the ACTUAL error on the screen instead of the hardcoded message!
-                statusDiv.innerHTML = `<span style="color:#e74c3c;">⚠️ ${error.message}</span>`;
+            const data = await response.json();
+
+            if (data.success) {
+                status.innerText = "✅ " + data.message;
+                status.style.color = "#2ecc71";
+            } else {
+                status.innerText = "❌ " + data.message;
+                status.style.color = "#e74c3c";
             }
+        } catch (error) {
+            console.error("Error:", error);
+            status.innerText = "⚠️ Error: " + error.message;
+            status.style.color = "#e74c3c";
         }
     });
-}
-
-function updateWelcomeText() {
-    let streakHTML = currentUserData.streak > 0 ? `<span class="streak-badge">🔥 ${currentUserData.streak} Day Streak</span>` : "";
-    document.getElementById("welcomeText").innerHTML = `Welcome back, ${currentUserData.username} 🌿 ${streakHTML}`;
-}
-
-function setupLogout() {
-    let logoutBtn = document.getElementById("logoutBtn");
-    logoutBtn.style.display = "block"; 
-    logoutBtn.addEventListener("click", () => {
-        feeders = feeders.filter(f => f.username !== currentUserData.username);
-        localStorage.setItem("feeders", JSON.stringify(feeders));
-        localStorage.removeItem("currentUser");
-        location.reload();
-    });
-}
-
-function startApp(){
-    checkTime(); 
-    let savedUsername = localStorage.getItem("currentUser");
-    let overlay = document.getElementById("loginOverlay");
-    let joinBtn = document.getElementById("joinBtn");
-    let usernameInput = document.getElementById("usernameInput");
-    let foodInput = document.getElementById("foodInput"); 
-    if(savedUsername){
-        currentUserData = feeders.find(f => f.username === savedUsername);
-        if(!currentUserData) { localStorage.removeItem("currentUser"); location.reload(); return; }
-        updateWelcomeText(); setupLogout(); setupAIVerification(); initMap(); startTimer(); return;
-    }
-    overlay.classList.add("active");
-    joinBtn.addEventListener("click", () => {
-        let username = usernameInput.value.trim();
-        let foodChoice = foodInput.value;
-        if(!username){ alert("Please enter a username to join!"); return; }
-        joinBtn.disabled = true; joinBtn.innerText = "Finding your location... 📍";
-        if(navigator.geolocation){
-            navigator.geolocation.getCurrentPosition(position => {
-                feeders = feeders.filter(f => f.username !== username);
-                currentUserData = { username: username, food: foodChoice, lat: position.coords.latitude, lng: position.coords.longitude, streak: 0, lastVerified: null };
-                feeders.push(currentUserData);
-                localStorage.setItem("feeders", JSON.stringify(feeders)); localStorage.setItem("currentUser", username);
-                updateWelcomeText(); setupLogout(); setupAIVerification(); overlay.classList.remove("active"); initMap(); startTimer();
-            }, () => {
-                alert("Location permission is required to show you on the map.");
-                joinBtn.disabled = false; joinBtn.innerText = "Join Community"; 
-            });
-        }
-    });
-}
-startApp();
 </script>
 
 </body>
 
 </html>
+
