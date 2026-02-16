@@ -19,7 +19,7 @@
         body {
             margin: 0; font-family: 'Nunito', sans-serif;
             background-color: #134e5e; 
-            background-image: url('bg.jpg') filter: blur(3px);
+            background-image: url('bg.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -187,7 +187,7 @@
         
         <div style="margin-bottom: 15px;">
             <label for="editProfilePicInput" style="cursor: pointer; display: inline-block;" title="Change Avatar">
-                <img id="editProfilePreview" src="logo.png" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-leaf); object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                <img id="editProfilePreview" src="logoo.png" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-leaf); object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
                 <p style="margin: 5px 0 0 0; font-size: 0.9em; color: var(--forest-light); font-weight: bold;">📷 Change Picture</p>
             </label>
             <input type="file" id="editProfilePicInput" accept="image/*" style="display: none;">
@@ -201,10 +201,10 @@
 </div>
 
 <header>
-    <img id="topRightAvatar" class="top-right-avatar" src="logo.png" title="Edit Profile">
+    <img id="topRightAvatar" class="top-right-avatar" src="logoo.png" title="Edit Profile">
 
     <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px;">
-        <img src="logo.png" alt="Community Logo" style="width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        <img src="logoo.png" alt="Community Logo" style="width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
         <h1 style="margin: 0;">Jamnagar Bird Feeding Community</h1>
     </div>
     <p>Feed Birds • Help Nature • Build Community</p>
@@ -323,7 +323,7 @@ const editProfileOverlay = document.getElementById('editProfileOverlay');
 topRightAvatar.addEventListener('click', () => {
     // Fill the modal with current data
     document.getElementById('editUsernameInput').value = currentUserData.username;
-    document.getElementById('editProfilePreview').src = currentUserData.profilePic || 'logo.png';
+    document.getElementById('editProfilePreview').src = currentUserData.profilePic || 'logoo.png';
     tempEditPic = currentUserData.profilePic;
     
     // Show modal
@@ -578,7 +578,7 @@ function updateWelcomeText() {
     if (currentUserData.profilePic) {
         topRightAvatar.src = currentUserData.profilePic;
     } else {
-        topRightAvatar.src = "logo.png";
+        topRightAvatar.src = "logoo.png";
     }
 }
 
@@ -655,4 +655,5 @@ startApp();
 </script>
 </body>
 </html>
+
 
