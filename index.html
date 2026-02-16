@@ -4,75 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jamnagar Bird Feeding Community</title>
-
+    
+    <link rel="icon" type="image/png" href="logo.png">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --forest-dark: #1b4332;
-            --forest-light: #40916c;
-            --accent-leaf: #95d5b2;
-            --text-dark: #081c15;
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.4);
+            --forest-dark: #1b4332; --forest-light: #40916c;
+            --accent-leaf: #95d5b2; --text-dark: #081c15;
+            --glass-bg: rgba(255, 255, 255, 0.85); --glass-border: rgba(255, 255, 255, 0.4);
             --alert-red: #e74c3c;
         }
-
         body {
             margin: 0; font-family: 'Nunito', sans-serif;
             background: linear-gradient(135deg, #134e5e 0%, #71b280 100%);
             background-attachment: fixed; color: var(--text-dark);
             text-align: center; line-height: 1.6;
         }
-
         header {
             background: rgba(27, 67, 50, 0.9); backdrop-filter: blur(10px);
             color: white; padding: 30px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             border-bottom: 2px solid var(--accent-leaf);
         }
-
-        header h1 { margin: 0 0 10px 0; font-weight: 800; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        header p { margin: 0; font-size: 1.1em; color: var(--accent-leaf); font-weight: 600; }
-        
         #timeBanner {
             padding: 12px; font-weight: bold; font-size: 1.1em;
             transition: background 0.5s, color 0.5s;
         }
         .day-banner { background: #f1c40f; color: #8e44ad; }
         .night-banner { background: #2c3e50; color: #ecf0f1; }
-
         section { padding: 20px; }
-
         .card {
-            background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            background: var(--glass-bg); backdrop-filter: blur(12px);
             margin: 25px auto; padding: 30px; width: 90%; max-width: 800px;
             border-radius: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-            border: 1px solid var(--glass-border); transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--glass-border); transition: transform 0.3s ease;
         }
-
         .card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2); }
-        
         .emergency-card { border: 2px solid var(--alert-red); background: rgba(253, 237, 236, 0.9); }
         .emergency-card h2 { color: var(--alert-red); border-bottom-color: var(--alert-red); }
-
         h2 { color: var(--forest-dark); border-bottom: 2px dashed var(--accent-leaf); padding-bottom: 10px; display: inline-block; margin-top: 0; }
-
         #map { height: 400px; border-radius: 15px; border: 3px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 1; }
-
         #timer {
             font-size: 28px; font-weight: 800; color: white;
             background: linear-gradient(135deg, var(--forest-light), var(--forest-dark));
             padding: 15px 30px; border-radius: 50px; display: inline-block;
-            margin-top: 15px; box-shadow: 0 4px 15px rgba(27, 67, 50, 0.4); letter-spacing: 2px; transition: 0.3s;
+            margin-top: 15px; box-shadow: 0 4px 15px rgba(27, 67, 50, 0.4); letter-spacing: 2px;
         }
-
         .stats-container {
             display: flex; justify-content: space-around; align-items: center; 
             flex-wrap: wrap; margin-top: 15px; background: rgba(255,255,255,0.5);
             padding: 15px; border-radius: 15px; border: 1px dashed var(--accent-leaf);
         }
-
         .leaderboard-list { list-style: none; padding: 0; margin: 0; text-align: left; }
         .leaderboard-item {
             display: flex; justify-content: space-between; align-items: center;
@@ -83,7 +66,6 @@
         .rank-1 { background: linear-gradient(135deg, #ffd700 0%, #fdb931 100%); color: #8a6327; border: none; }
         .rank-2 { background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%); color: #424242; border: none; }
         .rank-3 { background: linear-gradient(135deg, #cd7f32 0%, #a0522d 100%); color: #fff; border: none; }
-
         .info-card { text-align: left; }
         .info-card h3 { color: var(--forest-dark); margin-top: 25px; margin-bottom: 10px; font-size: 1.3em; }
         .info-list { list-style-type: none; padding: 0; margin: 0; }
@@ -99,10 +81,7 @@
             padding: 5px 12px; border-radius: 15px; font-size: 0.85em; font-weight: bold; transition: background 0.2s;
         }
         .source-links a:hover { background: var(--forest-light); }
-
         footer { background: var(--forest-dark); color: var(--accent-leaf); padding: 20px; margin-top: 40px; font-weight: 600; }
-        b { color: var(--forest-dark); }
-
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(8, 28, 21, 0.7); backdrop-filter: blur(6px);
@@ -114,44 +93,36 @@
             background: var(--glass-bg); padding: 40px; border-radius: 20px;
             text-align: center; width: 90%; max-width: 400px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
-            transform: translateY(20px); transition: transform 0.3s ease;
         }
-        .modal-overlay.active .modal-content { transform: translateY(0); }
         .modal-content input[type="text"], .modal-content select {
             width: 80%; padding: 12px 20px; margin: 10px 0 20px 0;
             border: 2px solid var(--accent-leaf); border-radius: 50px;
             font-size: 16px; font-family: 'Nunito', sans-serif; outline: none; background: white;
         }
-        .modal-content input[type="text"]:focus, .modal-content select:focus { border-color: var(--forest-light); }
-
         .btn {
             background: linear-gradient(135deg, var(--forest-light), var(--forest-dark));
             color: white; border: none; padding: 12px 30px;
             border-radius: 50px; font-size: 18px; font-weight: bold;
-            cursor: pointer; font-family: 'Nunito', sans-serif; transition: all 0.2s ease; display: inline-block;
+            cursor: pointer; font-family: 'Nunito', sans-serif; transition: all 0.2s ease;
         }
-        .btn:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(27, 67, 50, 0.4); }
-        .btn:disabled { background: #888; cursor: not-allowed; transform: none; box-shadow: none; }
-
+        .btn:hover { transform: scale(1.05); }
         .logout-btn {
             background: transparent; color: #d9534f; border: 2px solid #d9534f;
             padding: 8px 16px; border-radius: 20px; font-size: 14px;
-            font-weight: bold; font-family: 'Nunito', sans-serif; cursor: pointer; transition: all 0.3s ease; display: none; 
+            font-weight: bold; font-family: 'Nunito', sans-serif; cursor: pointer; display: none; 
         }
         .logout-btn:hover { background: #d9534f; color: white; }
-
         #ai-section { display: none; } 
         .upload-label {
             display: inline-block; background: white; color: var(--forest-dark);
             border: 2px dashed var(--forest-light); padding: 15px 30px;
-            border-radius: 15px; font-weight: bold; font-size: 16px; cursor: pointer; transition: all 0.3s; margin-top: 15px;
+            border-radius: 15px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 15px;
         }
         .upload-label:hover { background: #e8f5e9; border-color: var(--forest-dark); }
         #ai-status { margin-top: 15px; font-weight: bold; font-size: 1.1em; }
         .scanning { color: #f39c12; animation: pulse 1s infinite; }
         .success { color: #27ae60; }
         .streak-badge { background: #ffeaa7; color: #d35400; padding: 5px 15px; border-radius: 20px; font-size: 0.9em; display: inline-block; margin-left: 10px;}
-
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
@@ -162,7 +133,6 @@
     <div class="modal-content">
         <h2 style="border:none;">Join the Flock 🌿</h2>
         <input type="text" id="usernameInput" placeholder="Bird Feeder Name..." autocomplete="off" />
-        
         <p style="margin-bottom: 5px; font-weight: bold;">What are you feeding today?</p>
         <select id="foodInput">
             <option value="🌾 Seeds / Grains">🌾 Seeds / Grains</option>
@@ -176,7 +146,10 @@
 </div>
 
 <header>
-    <h1>🐦 Jamnagar Bird Feeding Community</h1>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px;">
+        <img src="logo.png" alt="Community Logo" style="width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        <h1 style="margin: 0;">Jamnagar Bird Feeding Community</h1>
+    </div>
     <p>Feed Birds • Help Nature • Build Community</p>
 </header>
 
@@ -187,10 +160,9 @@
         <h2 id="welcomeText" style="margin: 0; border: none;">Checking login... 🍃</h2>
         <button id="logoutBtn" class="logout-btn">Log Out</button>
     </div>
-    
     <div class="stats-container">
         <p style="font-size: 1.2em; margin: 0;"><b>🟢 Active Today:</b> <span id="counter" style="color: var(--forest-light); font-weight: 800; font-size: 1.4em;">0</span></p>
-        <p style="font-size: 1.1em; margin: 0; color: #555;"><b>💤 Offline Members:</b> <span id="offlineCounter" style="font-weight: bold;">99+</span></p>
+        <p style="font-size: 1.1em; margin: 0; color: #555;"><b>💤 Offline Members:</b> <span id="offlineCounter" style="font-weight: bold;">Loading...</span></p>
     </div>
 </section>
 
@@ -219,15 +191,6 @@
 </section>
 
 <section class="card">
-    <h2>🦩 Local Bird Spotlight</h2>
-    <div style="text-align: left; background: rgba(255,255,255,0.6); padding: 20px; border-radius: 12px; border-left: 5px solid #f1c40f;">
-        <h3 style="margin-top: 0; color: #d35400; font-size: 1.4em;">The Greater Flamingo</h3>
-        <p><b>📍 Where to spot them:</b> Khijadiya Bird Sanctuary & Marine National Park</p>
-        <p style="margin-bottom: 0;">Did you know the Greater Flamingo is the state bird of Gujarat? These beautiful pink giants flock to the saline and freshwater lagoons around Jamnagar during the winter. They actually get their famous pink color from the tiny shrimp and algae they eat in the shallow waters!</p>
-    </div>
-</section>
-
-<section class="card">
     <h2 id="gatheringHeader">📍 Today's Gathering Spot</h2><br>
     <div style="background: rgba(64, 145, 108, 0.1); padding: 15px; border-radius: 12px; border: 1px solid var(--forest-light); display: inline-block; margin-bottom: 15px;">
         <p id="meetingLocationText" style="font-size: 1.2em; margin: 0; color: var(--forest-dark);"><b>Location:</b> Loading today's spot...</p>
@@ -242,56 +205,14 @@
     <div id="map"></div>
 </section>
 
-<section class="card info-card">
-    <h2 style="text-align: center; display: block;">📖 The Bird Feeder's Guide</h2>
-    <p style="font-size: 1.1em; margin-bottom: 25px;">
-        <b>Why We Feed:</b> Bird feeding provides vital, high-energy nutrients that improve avian health, reduce stress, and increase survival rates—especially during harsh weather. As urbanization causes habitat loss, our community feeders help bridge nutritional gaps and offer a safe, reliable food source that supports breeding and migration.
-    </p>
-
-    <h3>🍽️ Best Foods to Offer</h3>
-    <ul class="info-list">
-        <li><b>🌻 Black Oil Sunflower Seeds:</b> Attracts the widest variety of birds due to high fat content and thin shells.</li>
-        <li><b>🌾 White Proso Millet:</b> Preferred by ground-feeding birds like sparrows and doves.</li>
-        <li><b>🥜 Unsalted Peanuts:</b> Great high-energy food for larger birds like woodpeckers and jays.</li>
-        <li><b>🍎 Fruit & Nectar:</b> Perfect for nectar-lovers and fruit-eating birds.</li>
-        <li><b>🚫 Avoid Fillers:</b> Steer clear of cheap mixes with high wheat content, as they provide low nutritional value.</li>
-    </ul>
-
-    <h3>💡 Important Tips for Success</h3>
-    <ul class="info-list">
-        <li>🧼 <b>Keep it Clean:</b> Wash your feeders regularly to prevent disease.</li>
-        <li>❄️ <b>Be Consistent:</b> Keep feeders stocked when natural food is scarce.</li>
-        <li>💧 <b>Add Water:</b> Providing a water source or birdbath is just as important as the food itself!</li>
-    </ul>
-
-    <h3>🔗 Sources & Further Reading</h3>
-    <div class="source-links">
-        <a href="https://www.wbfi.org/2021/11/30/why-bird-feeding-is-important/" target="_blank">WBFI Guide</a>
-        <a href="https://www.rspb.org.uk/birds-and-wildlife/feeding-birds-near-you" target="_blank">RSPB UK</a>
-        <a href="https://www.petmd.com/bird/feeding-birds-in-your-backyard" target="_blank">PetMD</a>
-        <a href="https://en.wikipedia.org/wiki/Bird_feeder" target="_blank">Wikipedia</a>
-    </div>
-</section>
-<div id="floatingSOS" class="sos-fab">
-        <span class="sos-icon">🚑</span>
-        <div id="sosMenu" class="sos-menu">
-            <h3>Bird Emergency SOS</h3>
-            <a href="tel:+919924418184" class="sos-link">📞 Jivdaya Trust</a>
-            <a href="tel:+919429519492" class="sos-link">📞 Wildlife Helpline</a>
-            <div class="nerd-box">
-                <p><b>Rescue Tip:</b> If a bird is cold, wrap it in a warm towel. Keep noise levels low to reduce stress.</p>
-            </div>
-        </div>
-    </div>
 <footer>
     <p>Made with 💚 for the Bird Lovers of Jamnagar</p>
 </footer>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <script>
 let map;
-let feeders = JSON.parse(localStorage.getItem("feeders")) || [];
+let feeders = [];
 let currentUserData = null;
 
 const colorfulBirdIcon = L.divIcon({
@@ -307,71 +228,104 @@ const dailyLocations = [
     { name: "Jogger's Park", lat: 22.4560, lng: 70.0630, desc: "Small Garden Birds & Pigeons", color: "#27ae60", fill: "#2ecc71", radius: 400 }
 ];
 
+// --- SERVER SYNC FUNCTIONS ---
+async function fetchAllFeeders() {
+    try {
+        let res = await fetch("https://heratofficial-birdfeeder.hf.space/get-feeders");
+        let data = await res.json();
+        // Server sometimes returns {error} if HTML, ensure it's an array
+        if (Array.isArray(data)) feeders = data; 
+        
+        if (map) {
+            map.eachLayer((layer) => { if (layer instanceof L.Marker) { layer.remove(); } }); 
+            updateMarkers();
+        }
+    } catch (e) {
+        console.warn("Could not load global leaderboard. Hugging Face might be waking up.");
+    }
+}
+
+async function syncFeederData() {
+    if (!currentUserData) return;
+    try {
+        await fetch("https://heratofficial-birdfeeder.hf.space/sync-feeder", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(currentUserData)
+        });
+        await fetchAllFeeders(); 
+    } catch (e) {
+        console.warn("Could not sync to server.");
+    }
+}
+// -----------------------------
+
 function getTodayLocation() {
     let now = new Date();
     let localEpochMs = now.getTime() - (now.getTimezoneOffset() * 60000);
     let daysSinceEpoch = Math.floor(localEpochMs / 86400000);
     let isTomorrow = now.getHours() >= 19;
-    if (isTomorrow) {
-        daysSinceEpoch += 1;
-    }
-    let index = daysSinceEpoch % dailyLocations.length;
-    return { loc: dailyLocations[index], isTomorrow: isTomorrow };
+    if (isTomorrow) { daysSinceEpoch += 1; }
+    return { loc: dailyLocations[daysSinceEpoch % dailyLocations.length], isTomorrow: isTomorrow };
 }
 
 function checkTime() {
     let now = new Date();
-    let hour = now.getHours();
-    let minute = now.getMinutes();
+    let h = now.getHours(), m = now.getMinutes();
     let banner = document.getElementById("timeBanner");
-    let isMorningLive = (hour === 8) || (hour === 9 && minute < 30);
-    let isEveningLive = (hour === 17 && minute >= 30) || (hour === 18);
-    if (isMorningLive || isEveningLive) {
+    let isLive = (h === 8) || (h === 9 && m < 30) || (h === 17 && m >= 30) || (h === 18);
+    if (isLive) {
         banner.className = "day-banner";
         banner.innerHTML = "🎉 The Gathering is Happening NOW! Go feed the birds and log your streak!";
-        banner.style.background = "#27ae60";
-        banner.style.color = "white";
-    } else if (hour >= 19 || hour < 6) {
+        banner.style.background = "#27ae60"; banner.style.color = "white";
+    } else if (h >= 19 || h < 6) {
         banner.className = "night-banner";
         banner.innerHTML = "🌙 The birds are resting! Check the map for tomorrow's location. See you at 8:00 AM!";
-        banner.style.background = "";
-        banner.style.color = "";
+        banner.style.background = ""; banner.style.color = "";
     } else {
         banner.className = "day-banner";
         banner.innerHTML = "☀️ Perfect weather for bird feeding! Don't forget to upload your photo for a streak.";
-        banner.style.background = "";
-        banner.style.color = "";
+        banner.style.background = ""; banner.style.color = "";
     }
 }
 
-function initMap(){
-    let locationData = getTodayLocation();
-    let todaySpot = locationData.loc;
-    let dayText = locationData.isTomorrow ? "Tomorrow's" : "Today's";
+function initMap() {
+    let { loc, isTomorrow } = getTodayLocation();
+    let dayText = isTomorrow ? "Tomorrow's" : "Today's";
     document.getElementById("gatheringHeader").innerText = `📍 ${dayText} Gathering Spot`;
-    document.getElementById("meetingLocationText").innerHTML = `<b>📍 ${todaySpot.name}</b> <br><span style="font-size: 0.85em; color: #555;">(${todaySpot.desc})</span>`;
-    map = L.map('map', { scrollWheelZoom: false }).setView([todaySpot.lat, todaySpot.lng], 13);
+    document.getElementById("meetingLocationText").innerHTML = `<b>📍 ${loc.name}</b> <br><span style="font-size: 0.85em; color: #555;">(${loc.desc})</span>`;
+    
+    map = L.map('map', { scrollWheelZoom: false }).setView([loc.lat, loc.lng], 13);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }).addTo(map);
-    L.circle([todaySpot.lat, todaySpot.lng], { 
-        color: todaySpot.color, weight: 3, fillColor: todaySpot.fill, fillOpacity: 0.4, radius: todaySpot.radius 
-    }).addTo(map)
-    .bindPopup(`<b style='color: ${todaySpot.color}; font-size: 1.1em;'>📍 ${dayText} Gathering</b><br>${todaySpot.name} (8:00 AM & 5:30 PM)`);
+    L.circle([loc.lat, loc.lng], { color: loc.color, weight: 3, fillColor: loc.fill, fillOpacity: 0.4, radius: loc.radius }).addTo(map)
+      .bindPopup(`<b style='color: ${loc.color};'>📍 ${dayText} Gathering</b><br>${loc.name} (8:00 AM & 5:30 PM)`);
+    
     updateMarkers();
 }
 
-function updateMarkers(){
-    feeders.forEach(f=>{
-        let streakText = f.streak > 0 ? ` <span style="color:#d35400; font-weight:bold;">🔥 ${f.streak}</span>` : "";
+function updateMarkers() {
+    let today = new Date().toDateString();
+    let activeTodayCount = 0;
+
+    feeders.forEach(f => {
+        let currentStreak = f.streak || 0; 
+        let streakText = currentStreak > 0 ? ` <span style="color:#d35400; font-weight:bold;">🔥 ${currentStreak}</span>` : "";
         let foodText = f.food ? `<br><span style="font-size:0.9em; color:#555;">Feeding: ${f.food}</span>` : "";
-        L.marker([f.lat, f.lng], { icon: colorfulBirdIcon }).addTo(map)
-        .bindPopup(`<b style='color: #1b4332;'>🌿 ${f.username}</b>${streakText}${foodText}`);
+        
+        if (map) {
+            L.marker([f.lat, f.lng], { icon: colorfulBirdIcon }).addTo(map)
+                .bindPopup(`<b style='color: #1b4332;'>🌿 ${f.username}</b>${streakText}${foodText}`);
+        }
+        
+        // Count as active if they opened the app today, verified today, or are brand new
+        if (f.lastActive === today || f.lastVerified === today || (currentStreak === 0 && !f.lastVerified)) {
+            activeTodayCount++;
+        }
     });
     
-    document.getElementById("counter").innerText = feeders.length;
-    
-    // CHANGED TO 99+ PER USER REQUEST
-    document.getElementById("offlineCounter").innerText = "99+";
-
+    document.getElementById("counter").innerText = activeTodayCount;
+    let offlineCount = feeders.length - activeTodayCount;
+    if (offlineCount < 0) offlineCount = 0;
+    document.getElementById("offlineCounter").innerText = offlineCount + 99;
     updateLeaderboard();
 }
 
@@ -385,48 +339,31 @@ function updateLeaderboard() {
     }
     sortedFeeders.forEach((f, index) => {
         let li = document.createElement("li");
-        li.className = "leaderboard-item";
-        if (index === 0) li.classList.add("rank-1");
-        else if (index === 1) li.classList.add("rank-2");
-        else if (index === 2) li.classList.add("rank-3");
+        li.className = `leaderboard-item ${index < 3 ? 'rank-'+(index+1) : ''}`;
         let rankMedal = ["🥇", "🥈", "🥉"][index] || `#${index + 1}`;
-        let streakNum = f.streak || 0;
-        li.innerHTML = `<span>${rankMedal} ${f.username}</span> <span>🔥 ${streakNum} Days</span>`;
+        li.innerHTML = `<span>${rankMedal} ${f.username}</span> <span>🔥 ${f.streak || 0} Days</span>`;
         list.appendChild(li);
     });
 }
 
-function startTimer(){
-    function updateTimer(){
+function startTimer() {
+    function updateTimer() {
         let now = new Date();
         let morningStart = new Date(); morningStart.setHours(8,0,0,0);
         let morningEnd = new Date(); morningEnd.setHours(9,30,0,0);
         let eveningStart = new Date(); eveningStart.setHours(17,30,0,0);
         let eveningEnd = new Date(); eveningEnd.setHours(19,0,0,0);
-        let targetTime;
-        let label = document.getElementById("meetingLabel");
-        let timerDiv = document.getElementById("timer");
-        if (now >= morningStart && now < morningEnd) {
-            label.innerText = "🟢 Morning Gathering is LIVE!";
-            targetTime = morningEnd;
-        } else if (now >= eveningStart && now < eveningEnd) {
-            label.innerText = "🟢 Evening Gathering is LIVE!";
-            targetTime = eveningEnd;
-        } else if (now < morningStart) {
-            label.innerText = "⏳ Time Left Until Morning Gathering (8:00 AM)";
-            targetTime = morningStart;
-        } else if (now < eveningStart) {
-            label.innerText = "⏳ Time Left Until Evening Gathering (5:30 PM)";
-            targetTime = eveningStart;
-        } else {
-            targetTime = new Date(morningStart); 
-            targetTime.setDate(targetTime.getDate() + 1);
-            label.innerText = "⏳ Time Left Until Tomorrow's Morning Gathering";
-        }
+        let targetTime, label = document.getElementById("meetingLabel"), timerDiv = document.getElementById("timer");
+        
+        if (now >= morningStart && now < morningEnd) { label.innerText = "🟢 Morning Gathering is LIVE!"; targetTime = morningEnd; } 
+        else if (now >= eveningStart && now < eveningEnd) { label.innerText = "🟢 Evening Gathering is LIVE!"; targetTime = eveningEnd; } 
+        else if (now < morningStart) { label.innerText = "⏳ Time Left Until Morning Gathering (8:00 AM)"; targetTime = morningStart; } 
+        else if (now < eveningStart) { label.innerText = "⏳ Time Left Until Evening Gathering (5:30 PM)"; targetTime = eveningStart; } 
+        else { targetTime = new Date(morningStart); targetTime.setDate(targetTime.getDate() + 1); label.innerText = "⏳ Time Left Until Tomorrow's Morning Gathering"; }
+        
         let diff = targetTime - now;
-        let h = Math.floor(diff / (1000*60*60));
-        let m = Math.floor((diff % (1000*60*60)) / (1000*60));
-        let s = Math.floor((diff % (1000*60)) / 1000);
+        let h = Math.floor(diff / (1000*60*60)), m = Math.floor((diff % (1000*60*60)) / (1000*60)), s = Math.floor((diff % (1000*60)) / 1000);
+        
         if ((now >= morningStart && now < morningEnd) || (now >= eveningStart && now < eveningEnd)) {
             timerDiv.innerHTML = `Ends in: ${h}h : ${m < 10 ? '0'+m : m}m : ${s < 10 ? '0'+s : s}s`;
             timerDiv.style.background = "linear-gradient(135deg, #e74c3c, #c0392b)";
@@ -457,90 +394,99 @@ function setupAIVerification() {
             statusDiv.innerHTML = `<span class="scanning">🤖 AI is looking for birds...</span>`;
             
             let formData = new FormData();
-            // SYNCED: We use 'image' to match the Python script
             formData.append("image", this.files[0]);
 
             try {
-                // SYNCED: Pointing to your live Hugging Face Space
-                let response = await fetch("https://heratofficial-birdfeeder.hf.space/verify-bird", { 
-                    method: "POST", 
-                    body: formData 
-                });
-                
+                let response = await fetch("https://heratofficial-birdfeeder.hf.space/verify-bird", { method: "POST", body: formData });
                 let result = await response.json();
 
                 if (result.success) {
                     currentUserData.streak = (currentUserData.streak || 0) + 1;
                     currentUserData.lastVerified = today;
-                    let userIndex = feeders.findIndex(f => f.username === currentUserData.username);
-                    if(userIndex !== -1) feeders[userIndex] = currentUserData;
-                    localStorage.setItem("feeders", JSON.stringify(feeders));
                     statusDiv.innerHTML = `<span class="success">✅ ${result.message}</span>`;
                     updateWelcomeText(); 
-                    map.eachLayer((layer) => { if (layer instanceof L.Marker) { layer.remove(); } }); 
-                    updateMarkers();
+                    await syncFeederData(); // Syncs streak to server
                 } else {
                     uploadLabel.style.display = "inline-block"; 
                     statusDiv.innerHTML = `<span style="color:#e74c3c;">❌ ${result.message}</span>`;
                 }
             } catch (error) {
                 uploadLabel.style.display = "inline-block"; 
-                statusDiv.innerHTML = `<span style="color:#e74c3c;">⚠️ Connection Error. Check if Hugging Face is 'Running'!</span>`;
+                statusDiv.innerHTML = `<span style="color:#e74c3c;">⚠️ Connection Error. Try again!</span>`;
             }
         }
     });
 }
 
 function updateWelcomeText() {
-    let streakHTML = currentUserData.streak > 0 ? `<span class="streak-badge">🔥 ${currentUserData.streak} Day Streak</span>` : "";
-    document.getElementById("welcomeText").innerHTML = `Welcome back, ${currentUserData.username} 🌿 ${streakHTML}`;
+    let s = currentUserData.streak > 0 ? `<span class="streak-badge">🔥 ${currentUserData.streak} Day Streak</span>` : "";
+    document.getElementById("welcomeText").innerHTML = `Welcome back, ${currentUserData.username} 🌿 ${s}`;
 }
 
 function setupLogout() {
     let logoutBtn = document.getElementById("logoutBtn");
     logoutBtn.style.display = "block"; 
     logoutBtn.addEventListener("click", () => {
-        feeders = feeders.filter(f => f.username !== currentUserData.username);
-        localStorage.setItem("feeders", JSON.stringify(feeders));
         localStorage.removeItem("currentUser");
         location.reload();
     });
 }
 
-function startApp(){
+async function startApp() {
     checkTime(); 
+    let today = new Date().toDateString();
+    
+    // 1. Pull leaderboard from server first
+    await fetchAllFeeders(); 
+    
     let savedUsername = localStorage.getItem("currentUser");
     let overlay = document.getElementById("loginOverlay");
     let joinBtn = document.getElementById("joinBtn");
-    let usernameInput = document.getElementById("usernameInput");
-    let foodInput = document.getElementById("foodInput"); 
-    if(savedUsername){
+    
+    // 2. Returning User Login
+    if (savedUsername) {
         currentUserData = feeders.find(f => f.username === savedUsername);
-        if(!currentUserData) { localStorage.removeItem("currentUser"); location.reload(); return; }
-        updateWelcomeText(); setupLogout(); setupAIVerification(); initMap(); startTimer(); return;
+        
+        if (!currentUserData) {
+            currentUserData = { username: savedUsername, food: "🌾 Seeds", lat: 22.4707, lng: 70.0577, streak: 0, lastVerified: null, lastActive: today };
+        } else {
+            currentUserData.lastActive = today; 
+        }
+        
+        await syncFeederData(); // Save activity status to server
+        
+        updateWelcomeText(); setupLogout(); setupAIVerification(); initMap(); startTimer();
+        setInterval(fetchAllFeeders, 30000); // Auto-refresh leaderboard
+        return;
     }
+    
+    // 3. Brand New User Login
     overlay.classList.add("active");
     joinBtn.addEventListener("click", () => {
-        let username = usernameInput.value.trim();
-        let foodChoice = foodInput.value;
-        if(!username){ alert("Please enter a username to join!"); return; }
+        let username = document.getElementById("usernameInput").value.trim();
+        let foodChoice = document.getElementById("foodInput").value;
+        if(!username){ alert("Please enter a username!"); return; }
+        
         joinBtn.disabled = true; joinBtn.innerText = "Finding your location... 📍";
+        
         if(navigator.geolocation){
-            navigator.geolocation.getCurrentPosition(position => {
-                feeders = feeders.filter(f => f.username !== username);
-                currentUserData = { username: username, food: foodChoice, lat: position.coords.latitude, lng: position.coords.longitude, streak: 0, lastVerified: null };
-                feeders.push(currentUserData);
-                localStorage.setItem("feeders", JSON.stringify(feeders)); localStorage.setItem("currentUser", username);
+            navigator.geolocation.getCurrentPosition(async position => {
+                currentUserData = { username: username, food: foodChoice, lat: position.coords.latitude, lng: position.coords.longitude, streak: 0, lastVerified: null, lastActive: today };
+                localStorage.setItem("currentUser", username);
+                
+                await syncFeederData(); // Save new user to server
+                
                 updateWelcomeText(); setupLogout(); setupAIVerification(); overlay.classList.remove("active"); initMap(); startTimer();
-            }, () => {
-                alert("Location permission is required to show you on the map.");
+                setInterval(fetchAllFeeders, 30000);
+            }, () => { 
+                alert("Location permission is required to put you on the map."); 
                 joinBtn.disabled = false; joinBtn.innerText = "Join Community"; 
             });
         }
     });
 }
+
 startApp();
 </script>
-
 </body>
 </html>
