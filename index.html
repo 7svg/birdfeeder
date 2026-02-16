@@ -18,15 +18,41 @@
         }
         body {
             margin: 0; font-family: 'Nunito', sans-serif;
-            background: linear-gradient(135deg, #134e5e 0%, #71b280 100%);
-            background-attachment: fixed; color: var(--text-dark);
+            background-color: #134e5e; 
+            background-image: url('bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-dark);
             text-align: center; line-height: 1.6;
         }
         header {
             background: rgba(27, 67, 50, 0.9); backdrop-filter: blur(10px);
             color: white; padding: 30px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             border-bottom: 2px solid var(--accent-leaf);
+            position: relative; /* Needed for top-right avatar positioning */
         }
+        
+        /* NEW: Top Right Profile Avatar */
+        .top-right-avatar {
+            position: absolute;
+            top: 25px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-leaf);
+            object-fit: cover;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            display: none; /* Hidden until logged in */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .top-right-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+        }
+
         #timeBanner {
             padding: 12px; font-weight: bold; font-size: 1.1em;
             transition: background 0.5s, color 0.5s;
@@ -123,6 +149,7 @@
         .scanning { color: #f39c12; animation: pulse 1s infinite; }
         .success { color: #27ae60; }
         .streak-badge { background: #ffeaa7; color: #d35400; padding: 5px 15px; border-radius: 20px; font-size: 0.9em; display: inline-block; margin-left: 10px;}
+        
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
@@ -132,6 +159,15 @@
 <div id="loginOverlay" class="modal-overlay">
     <div class="modal-content">
         <h2 style="border:none;">Join the Flock 🌿</h2>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="profilePicInput" style="cursor: pointer; display: inline-block;" title="Upload an Avatar!">
+                <img id="profilePreview" src="logoo.png" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-leaf); object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                <p style="margin: 5px 0 0 0; font-size: 0.9em; color: var(--forest-light); font-weight: bold;">📷 Choose Avatar</p>
+            </label>
+            <input type="file" id="profilePicInput" accept="image/*" style="display: none;">
+        </div>
+
         <input type="text" id="usernameInput" placeholder="Bird Feeder Name..." autocomplete="off" />
         <p style="margin-bottom: 5px; font-weight: bold;">What are you feeding today?</p>
         <select id="foodInput">
@@ -145,9 +181,30 @@
     </div>
 </div>
 
+<div id="editProfileOverlay" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="border:none;">Edit Profile ✏️</h2>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="editProfilePicInput" style="cursor: pointer; display: inline-block;" title="Change Avatar">
+                <img id="editProfilePreview" src="logo.png" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-leaf); object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                <p style="margin: 5px 0 0 0; font-size: 0.9em; color: var(--forest-light); font-weight: bold;">📷 Change Picture</p>
+            </label>
+            <input type="file" id="editProfilePicInput" accept="image/*" style="display: none;">
+        </div>
+
+        <input type="text" id="editUsernameInput" placeholder="New Name..." autocomplete="off" />
+        <br>
+        <button id="saveProfileBtn" class="btn" style="margin-top: 10px; width: 80%;">Save Changes</button><br>
+        <button id="closeProfileBtn" class="btn" style="background: transparent; color: #555; border: 2px solid #ccc; margin-top: 10px; box-shadow: none; width: 80%;">Cancel</button>
+    </div>
+</div>
+
 <header>
+    <img id="topRightAvatar" class="top-right-avatar" src="logo.png" title="Edit Profile">
+
     <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px;">
-        <img src="logoo.png" alt="Community Logo" style="width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        <img src="logo.png" alt="Community Logo" style="width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
         <h1 style="margin: 0;">Jamnagar Bird Feeding Community</h1>
     </div>
     <p>Feed Birds • Help Nature • Build Community</p>
@@ -157,9 +214,10 @@
 
 <section class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <h2 id="welcomeText" style="margin: 0; border: none;">Checking login... 🍃</h2>
+        <h2 id="welcomeText" style="margin: 0; border: none; font-size: 1.4em;">Checking login... 🍃</h2>
         <button id="logoutBtn" class="logout-btn">Log Out</button>
     </div>
+    
     <div class="stats-container">
         <p style="font-size: 1.2em; margin: 0;"><b>🟢 Active Today:</b> <span id="counter" style="color: var(--forest-light); font-weight: 800; font-size: 1.4em;">0</span></p>
         <p style="font-size: 1.1em; margin: 0; color: #555;"><b>💤 Offline Members:</b> <span id="offlineCounter" style="font-weight: bold;">Loading...</span></p>
@@ -214,16 +272,100 @@
 let map;
 let feeders = [];
 let currentUserData = null;
+let selectedProfilePic = null; 
+let tempEditPic = null; // Used when changing picture in the edit menu
 
-// --- NEW: DEVICE ID GENERATOR ---
-// This creates a permanent ID for this specific phone/computer
 let myDeviceId = localStorage.getItem("deviceId");
 if (!myDeviceId) {
-    // Generate a random ID like 'device-xyz123abc'
     myDeviceId = 'device-' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36);
     localStorage.setItem("deviceId", myDeviceId);
 }
-// --------------------------------
+
+function compressImage(file, callback) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const size = 150; 
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, size, size);
+            
+            let srcX = 0, srcY = 0, srcSize = Math.min(img.width, img.height);
+            if (img.width > img.height) srcX = (img.width - img.height) / 2;
+            else srcY = (img.height - img.width) / 2;
+            
+            ctx.drawImage(img, srcX, srcY, srcSize, srcSize, 0, 0, size, size);
+            callback(canvas.toDataURL('image/jpeg', 0.8)); 
+        }
+        img.src = e.target.result;
+    }
+    reader.readAsDataURL(file);
+}
+
+// Initial Login Avatar
+document.getElementById('profilePicInput').addEventListener('change', function(e) {
+    if (e.target.files.length > 0) {
+        compressImage(e.target.files[0], (base64) => {
+            selectedProfilePic = base64;
+            document.getElementById('profilePreview').src = base64;
+        });
+    }
+});
+
+// --- NEW: Edit Profile Logic ---
+const topRightAvatar = document.getElementById('topRightAvatar');
+const editProfileOverlay = document.getElementById('editProfileOverlay');
+
+topRightAvatar.addEventListener('click', () => {
+    // Fill the modal with current data
+    document.getElementById('editUsernameInput').value = currentUserData.username;
+    document.getElementById('editProfilePreview').src = currentUserData.profilePic || 'logo.png';
+    tempEditPic = currentUserData.profilePic;
+    
+    // Show modal
+    editProfileOverlay.classList.add('active');
+});
+
+document.getElementById('editProfilePicInput').addEventListener('change', function(e) {
+    if (e.target.files.length > 0) {
+        compressImage(e.target.files[0], (base64) => {
+            tempEditPic = base64; // Save to temp until they hit "Save"
+            document.getElementById('editProfilePreview').src = base64;
+        });
+    }
+});
+
+document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+    let newName = document.getElementById('editUsernameInput').value.trim();
+    if (!newName) { alert("Name cannot be empty!"); return; }
+
+    // Update Data
+    currentUserData.username = newName;
+    currentUserData.profilePic = tempEditPic;
+    localStorage.setItem("currentUser", newName); // Keep localStorage synced
+
+    // Close Modal and instantly update UI
+    editProfileOverlay.classList.remove('active');
+    updateWelcomeText();
+    
+    // Update map pins and leaderboard instantly
+    if (map) {
+        map.eachLayer((layer) => { if (layer instanceof L.Marker) { layer.remove(); } }); 
+        updateMarkers();
+    }
+    
+    // Save to Hugging Face
+    await syncFeederData();
+});
+
+document.getElementById('closeProfileBtn').addEventListener('click', () => {
+    editProfileOverlay.classList.remove('active');
+});
+// -------------------------------
 
 const colorfulBirdIcon = L.divIcon({
     html: `<div style="background: linear-gradient(135deg, #40916c, #1b4332); width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 2px 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><span style="transform: rotate(45deg); font-size: 16px;">🐦</span></div>`,
@@ -243,14 +385,8 @@ async function fetchAllFeeders() {
         let res = await fetch("https://heratofficial-birdfeeder.hf.space/get-feeders");
         let data = await res.json();
         if (Array.isArray(data)) feeders = data; 
-        
-        if (map) {
-            map.eachLayer((layer) => { if (layer instanceof L.Marker) { layer.remove(); } }); 
-            updateMarkers();
-        }
-    } catch (e) {
-        console.warn("Could not load global leaderboard.");
-    }
+        if (map) { map.eachLayer((layer) => { if (layer instanceof L.Marker) { layer.remove(); } }); updateMarkers(); }
+    } catch (e) { console.warn("Could not load global leaderboard."); }
 }
 
 async function syncFeederData() {
@@ -261,9 +397,7 @@ async function syncFeederData() {
             body: JSON.stringify(currentUserData)
         });
         await fetchAllFeeders(); 
-    } catch (e) {
-        console.warn("Could not sync to server.");
-    }
+    } catch (e) { console.warn("Could not sync to server."); }
 }
 
 function getTodayLocation() {
@@ -276,21 +410,17 @@ function getTodayLocation() {
 }
 
 function checkTime() {
-    let now = new Date();
-    let h = now.getHours(), m = now.getMinutes();
+    let now = new Date(), h = now.getHours(), m = now.getMinutes();
     let banner = document.getElementById("timeBanner");
     let isLive = (h === 8) || (h === 9 && m < 30) || (h === 17 && m >= 30) || (h === 18);
     if (isLive) {
-        banner.className = "day-banner";
-        banner.innerHTML = "🎉 The Gathering is Happening NOW! Go feed the birds and log your streak!";
+        banner.className = "day-banner"; banner.innerHTML = "🎉 The Gathering is Happening NOW! Go feed the birds and log your streak!";
         banner.style.background = "#27ae60"; banner.style.color = "white";
     } else if (h >= 19 || h < 6) {
-        banner.className = "night-banner";
-        banner.innerHTML = "🌙 The birds are resting! Check the map for tomorrow's location. See you at 8:00 AM!";
+        banner.className = "night-banner"; banner.innerHTML = "🌙 The birds are resting! Check the map for tomorrow's location. See you at 8:00 AM!";
         banner.style.background = ""; banner.style.color = "";
     } else {
-        banner.className = "day-banner";
-        banner.innerHTML = "☀️ Perfect weather for bird feeding! Don't forget to upload your photo for a streak.";
+        banner.className = "day-banner"; banner.innerHTML = "☀️ Perfect weather for bird feeding! Don't forget to upload your photo for a streak.";
         banner.style.background = ""; banner.style.color = "";
     }
 }
@@ -305,7 +435,6 @@ function initMap() {
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }).addTo(map);
     L.circle([loc.lat, loc.lng], { color: loc.color, weight: 3, fillColor: loc.fill, fillOpacity: 0.4, radius: loc.radius }).addTo(map)
       .bindPopup(`<b style='color: ${loc.color};'>📍 ${dayText} Gathering</b><br>${loc.name} (8:00 AM & 5:30 PM)`);
-    
     updateMarkers();
 }
 
@@ -319,7 +448,17 @@ function updateMarkers() {
         let foodText = f.food ? `<br><span style="font-size:0.9em; color:#555;">Feeding: ${f.food}</span>` : "";
         
         if (map) {
-            L.marker([f.lat, f.lng], { icon: colorfulBirdIcon }).addTo(map)
+            let activeIcon = colorfulBirdIcon;
+            if (f.profilePic) {
+                activeIcon = L.divIcon({
+                    html: `<div style="width: 36px; height: 36px; border-radius: 50%; border: 3px solid white; box-shadow: 2px 4px 10px rgba(0,0,0,0.4); background-image: url('${f.profilePic}'); background-size: cover; background-position: center; position: relative;">
+                               <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid white;"></div>
+                           </div>`,
+                    className: 'custom-pin', iconSize: [36, 44], iconAnchor: [18, 44], popupAnchor: [0, -44]
+                });
+            }
+
+            L.marker([f.lat, f.lng], { icon: activeIcon }).addTo(map)
                 .bindPopup(`<b style='color: #1b4332;'>🌿 ${f.username}</b>${streakText}${foodText}`);
         }
         
@@ -331,7 +470,7 @@ function updateMarkers() {
     document.getElementById("counter").innerText = activeTodayCount;
     let offlineCount = feeders.length - activeTodayCount;
     if (offlineCount < 0) offlineCount = 0;
-    document.getElementById("offlineCounter").innerText = offlineCount + 99;
+    document.getElementById("offlineCounter").innerText = offlineCount;
     updateLeaderboard();
 }
 
@@ -347,7 +486,18 @@ function updateLeaderboard() {
         let li = document.createElement("li");
         li.className = `leaderboard-item ${index < 3 ? 'rank-'+(index+1) : ''}`;
         let rankMedal = ["🥇", "🥈", "🥉"][index] || `#${index + 1}`;
-        li.innerHTML = `<span>${rankMedal} ${f.username}</span> <span>🔥 ${f.streak || 0} Days</span>`;
+        
+        let avatarHTML = f.profilePic ? 
+            `<img src="${f.profilePic}" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">` : 
+            `<div style="width: 34px; height: 34px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid var(--accent-leaf);">🐦</div>`;
+
+        li.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="width: 25px; text-align: center;">${rankMedal}</span>
+                ${avatarHTML}
+                <span>${f.username}</span>
+            </div> 
+            <span>🔥 ${f.streak || 0} Days</span>`;
         list.appendChild(li);
     });
 }
@@ -398,9 +548,7 @@ function setupAIVerification() {
         if(this.files.length > 0) {
             uploadLabel.style.display = "none"; 
             statusDiv.innerHTML = `<span class="scanning">🤖 AI is looking for birds...</span>`;
-            
-            let formData = new FormData();
-            formData.append("image", this.files[0]);
+            let formData = new FormData(); formData.append("image", this.files[0]);
 
             try {
                 let response = await fetch("https://heratofficial-birdfeeder.hf.space/verify-bird", { method: "POST", body: formData });
@@ -410,15 +558,12 @@ function setupAIVerification() {
                     currentUserData.streak = (currentUserData.streak || 0) + 1;
                     currentUserData.lastVerified = today;
                     statusDiv.innerHTML = `<span class="success">✅ ${result.message}</span>`;
-                    updateWelcomeText(); 
-                    await syncFeederData(); 
+                    updateWelcomeText(); await syncFeederData(); 
                 } else {
-                    uploadLabel.style.display = "inline-block"; 
-                    statusDiv.innerHTML = `<span style="color:#e74c3c;">❌ ${result.message}</span>`;
+                    uploadLabel.style.display = "inline-block"; statusDiv.innerHTML = `<span style="color:#e74c3c;">❌ ${result.message}</span>`;
                 }
             } catch (error) {
-                uploadLabel.style.display = "inline-block"; 
-                statusDiv.innerHTML = `<span style="color:#e74c3c;">⚠️ Connection Error. Try again!</span>`;
+                uploadLabel.style.display = "inline-block"; statusDiv.innerHTML = `<span style="color:#e74c3c;">⚠️ Connection Error. Try again!</span>`;
             }
         }
     });
@@ -427,48 +572,49 @@ function setupAIVerification() {
 function updateWelcomeText() {
     let s = currentUserData.streak > 0 ? `<span class="streak-badge">🔥 ${currentUserData.streak} Day Streak</span>` : "";
     document.getElementById("welcomeText").innerHTML = `Welcome back, ${currentUserData.username} 🌿 ${s}`;
+    
+    // NEW: Show top right avatar and update image
+    topRightAvatar.style.display = "block";
+    if (currentUserData.profilePic) {
+        topRightAvatar.src = currentUserData.profilePic;
+    } else {
+        topRightAvatar.src = "logo.png";
+    }
 }
 
 function setupLogout() {
     let logoutBtn = document.getElementById("logoutBtn");
     logoutBtn.style.display = "block"; 
     logoutBtn.addEventListener("click", () => {
-        // We DO NOT delete the deviceId, we just delete the visual login state
         localStorage.removeItem("currentUser");
         location.reload();
     });
 }
 
 async function startApp() {
-    checkTime(); 
-    let today = new Date().toDateString();
-    
+    checkTime(); let today = new Date().toDateString();
     await fetchAllFeeders(); 
     
     let savedUsername = localStorage.getItem("currentUser");
     let overlay = document.getElementById("loginOverlay");
     let joinBtn = document.getElementById("joinBtn");
     
-    // Returning User (Session exists)
     if (savedUsername) {
-        // Find them by their DEVICE ID, not their name anymore!
         currentUserData = feeders.find(f => f.deviceId === myDeviceId);
         
         if (!currentUserData) {
-            currentUserData = { deviceId: myDeviceId, username: savedUsername, food: "🌾 Seeds", lat: 22.4707, lng: 70.0577, streak: 0, lastVerified: null, lastActive: today };
+            currentUserData = { deviceId: myDeviceId, username: savedUsername, food: "🌾 Seeds", profilePic: null, lat: 22.4707, lng: 70.0577, streak: 0, lastVerified: null, lastActive: today };
         } else {
             currentUserData.lastActive = today; 
-            currentUserData.username = savedUsername; // Just in case
+            currentUserData.username = savedUsername; 
         }
         
         await syncFeederData(); 
-        
         updateWelcomeText(); setupLogout(); setupAIVerification(); initMap(); startTimer();
         setInterval(fetchAllFeeders, 30000); 
         return;
     }
     
-    // "New" User or Logged Out User
     overlay.classList.add("active");
     joinBtn.addEventListener("click", () => {
         let username = document.getElementById("usernameInput").value.trim();
@@ -480,11 +626,11 @@ async function startApp() {
         if(navigator.geolocation){
             navigator.geolocation.getCurrentPosition(async position => {
                 
-                // NEW LOGIC: This creates the profile, overwriting the old one on the server because the deviceId matches!
                 currentUserData = { 
                     deviceId: myDeviceId, 
                     username: username, 
                     food: foodChoice, 
+                    profilePic: selectedProfilePic, 
                     lat: position.coords.latitude, 
                     lng: position.coords.longitude, 
                     streak: 0, 
@@ -493,8 +639,7 @@ async function startApp() {
                 };
                 
                 localStorage.setItem("currentUser", username);
-                
-                await syncFeederData(); // Sends the reset to Hugging Face
+                await syncFeederData(); 
                 
                 updateWelcomeText(); setupLogout(); setupAIVerification(); overlay.classList.remove("active"); initMap(); startTimer();
                 setInterval(fetchAllFeeders, 30000);
@@ -510,4 +655,3 @@ startApp();
 </script>
 </body>
 </html>
-
