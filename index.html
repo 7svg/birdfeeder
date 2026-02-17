@@ -162,7 +162,7 @@
         
         <div style="margin-bottom: 15px;">
             <label for="profilePicInput" style="cursor: pointer; display: inline-block;" title="Upload an Avatar!">
-                <img id="profilePreview" src="logoo.png" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-leaf); object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                <img id="profilePreview" src="logo.png" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-leaf); object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
                 <p style="margin: 5px 0 0 0; font-size: 0.9em; color: var(--forest-light); font-weight: bold;">📷 Choose Avatar</p>
             </label>
             <input type="file" id="profilePicInput" accept="image/*" style="display: none;">
@@ -187,7 +187,7 @@
         
         <div style="margin-bottom: 15px;">
             <label for="editProfilePicInput" style="cursor: pointer; display: inline-block;" title="Change Avatar">
-                <img id="editProfilePreview" src="logoo.png" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-leaf); object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                <img id="editProfilePreview" src="logo.png" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-leaf); object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
                 <p style="margin: 5px 0 0 0; font-size: 0.9em; color: var(--forest-light); font-weight: bold;">📷 Change Picture</p>
             </label>
             <input type="file" id="editProfilePicInput" accept="image/*" style="display: none;">
@@ -384,9 +384,29 @@ async function fetchAllFeeders() {
     try {
         let res = await fetch("https://heratofficial-birdfeeder.hf.space/get-feeders");
         let data = await res.json();
-        if (Array.isArray(data)) feeders = data; 
-        if (map) { map.eachLayer((layer) => { if (layer instanceof L.Marker) { layer.remove(); } }); updateMarkers(); }
-    } catch (e) { console.warn("Could not load global leaderboard."); }
+        
+        if (Array.isArray(data)) {
+            // --- FRONTEND DEDUPLICATOR ---
+            // Forces the app to only keep ONE profile per device ID
+            let uniqueFeeders = {};
+            data.forEach(f => {
+                if (f.deviceId) {
+                    uniqueFeeders[f.deviceId] = f;
+                } else {
+                    uniqueFeeders[f.username] = f; // Fallback for really old accounts
+                }
+            });
+            // Turn it back into an array for the map and leaderboard
+            feeders = Object.values(uniqueFeeders);
+        } 
+        
+        if (map) { 
+            map.eachLayer((layer) => { if (layer instanceof L.Marker) { layer.remove(); } }); 
+            updateMarkers(); 
+        }
+    } catch (e) { 
+        console.warn("Could not load global leaderboard."); 
+    }
 }
 
 async function syncFeederData() {
@@ -655,5 +675,3 @@ startApp();
 </script>
 </body>
 </html>
-
-
