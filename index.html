@@ -66,7 +66,7 @@
             margin: 25px auto; padding: 30px; width: 90%; max-width: 800px;
             border-radius: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
             border: 1px solid var(--glass-border); transition: transform 0.3s ease;
-            box-sizing: border-box; /* Fixes overflow issues */
+            box-sizing: border-box; 
         }
         .card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2); }
         .emergency-card { border: 2px solid var(--alert-red); background: rgba(253, 237, 236, 0.9); }
@@ -80,7 +80,6 @@
             margin-top: 15px; box-shadow: 0 4px 15px rgba(27, 67, 50, 0.4); letter-spacing: 2px;
         }
         
-        /* Updated UI structure for Welcome and Action buttons */
         .welcome-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
         .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
         
@@ -176,9 +175,7 @@
 
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        /* =========================================================
-           📱 MOBILE RESPONSIVENESS FIXES (The Anti-Squish Magic) 
-           ========================================================= */
+        /* MOBILE RESPONSIVENESS */
         @media (max-width: 768px) {
             header { padding: 20px 10px; }
             header img[alt="Community Logo"] { width: 45px !important; height: 45px !important; }
@@ -186,25 +183,20 @@
             
             .top-right-avatar { top: 15px; right: 15px; width: 35px; height: 35px; }
             
-            /* Give more screen space to content on mobile */
             .card { width: 95%; padding: 20px 15px; margin: 15px auto; }
             h2 { font-size: 1.3em; }
             
-            /* Stack buttons cleanly instead of smashing them side-by-side */
             .welcome-header { flex-direction: column; text-align: center; justify-content: center; }
             #welcomeText { font-size: 1.2em !important; line-height: 1.4; }
             .action-buttons { width: 100%; justify-content: center; }
             .action-buttons button { flex: 1; min-width: 120px; padding: 12px; font-size: 14px; }
             
-            /* Adjust map height and timer size for small screens */
             #map { height: 300px; }
             #timer { font-size: 1.2em; padding: 12px 20px; width: 100%; box-sizing: border-box; }
             
-            /* Modal layout fixes */
             .modal-content { padding: 30px 20px; width: 92%; }
             .modal-content input[type="text"], .modal-content select { width: 100%; }
             
-            /* Ensure leaderboard fits perfectly */
             .leaderboard-item { font-size: 0.95em; padding: 12px; }
             .leaderboard-item img, .leaderboard-item div[style*="border-radius: 50%"] { 
                 width: 28px !important; height: 28px !important; font-size: 14px !important; 
@@ -323,7 +315,8 @@
 </section>
 
 <section class="card">
-    <h2>🗺 Active Bird Feeders Map</h2>
+    <h2>🗺 Daily Gathering Map</h2>
+    <p style="margin-top: 0;">Check exactly where we are feeding the birds today!</p>
     <div id="map"></div>
 </section>
 
@@ -373,7 +366,7 @@ document.getElementById('shareWhatsAppBtn').addEventListener('click', () => {
         ? `I'm on a ${currentUserData.streak}-day bird feeding streak! 🔥 ` 
         : "";
     
-    let message = `🌿 ${streakText}Join the Jamnagar Bird Feeding Community! Plant your spot on the map, feed the birds, and build your streak. Let's help nature together! 🐦📍 Join here: https://7svg.github.io/birdfeeder/`;
+    let message = `🌿 ${streakText}Do you love bird feeding? Join the Jamnagar Bird Feeding Community! Plant your spot on the map, feed the birds, and build your streak. Let's help nature together! 🐦📍 Join here: https://7svg.github.io/birdfeeder/`;
     
     let whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -443,21 +436,12 @@ document.getElementById('saveProfileBtn').addEventListener('click', async () => 
     editProfileOverlay.classList.remove('active');
     updateWelcomeText();
     
-    if (map) {
-        map.eachLayer((layer) => { if (layer instanceof L.Marker) { layer.remove(); } }); 
-        updateMarkers();
-    }
-    
+    updateCountersAndLeaderboard();
     await syncFeederData();
 });
 
 document.getElementById('closeProfileBtn').addEventListener('click', () => {
     editProfileOverlay.classList.remove('active');
-});
-
-const colorfulBirdIcon = L.divIcon({
-    html: `<div style="background: linear-gradient(135deg, #40916c, #1b4332); width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 2px 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><span style="transform: rotate(45deg); font-size: 16px;">🐦</span></div>`,
-    className: 'custom-pin', iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -38]
 });
 
 const dailyLocations = [
@@ -483,7 +467,7 @@ async function fetchAllFeeders() {
             });
             feeders = Object.values(uniqueFeeders);
         } 
-        if (map) { map.eachLayer((layer) => { if (layer instanceof L.Marker) { layer.remove(); } }); updateMarkers(); }
+        updateCountersAndLeaderboard();
     } catch (e) { console.warn("Could not load global leaderboard."); }
 }
 
@@ -529,37 +513,23 @@ function initMap() {
     document.getElementById("gatheringHeader").innerText = `📍 ${dayText} Gathering Spot`;
     document.getElementById("meetingLocationText").innerHTML = `<b>📍 ${loc.name}</b> <br><span style="font-size: 0.85em; color: #555;">(${loc.desc})</span>`;
     
+    // Creates the map strictly for the gathering spot (No user markers)
     map = L.map('map', { scrollWheelZoom: false }).setView([loc.lat, loc.lng], 13);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }).addTo(map);
     L.circle([loc.lat, loc.lng], { color: loc.color, weight: 3, fillColor: loc.fill, fillOpacity: 0.4, radius: loc.radius }).addTo(map)
-      .bindPopup(`<b style='color: ${loc.color};'>📍 ${dayText} Gathering</b><br>${loc.name} (8:00 AM & 5:30 PM)`);
-    updateMarkers();
+      .bindPopup(`<b style='color: ${loc.color};'>📍 ${dayText} Gathering</b><br>${loc.name} (8:00 AM & 5:30 PM)`)
+      .openPopup();
+      
+    updateCountersAndLeaderboard();
 }
 
-function updateMarkers() {
+// Renamed from updateMarkers to updateCountersAndLeaderboard since we don't draw user markers anymore
+function updateCountersAndLeaderboard() {
     let today = new Date().toDateString();
     let activeTodayCount = 0;
 
     feeders.forEach(f => {
         let currentStreak = f.streak || 0; 
-        let streakText = currentStreak > 0 ? ` <span style="color:#d35400; font-weight:bold;">🔥 ${currentStreak}</span>` : "";
-        let foodText = f.food ? `<br><span style="font-size:0.9em; color:#555;">Feeding: ${f.food}</span>` : "";
-        
-        if (map) {
-            let activeIcon = colorfulBirdIcon;
-            if (f.profilePic) {
-                activeIcon = L.divIcon({
-                    html: `<div style="width: 36px; height: 36px; border-radius: 50%; border: 3px solid white; box-shadow: 2px 4px 10px rgba(0,0,0,0.4); background-image: url('${f.profilePic}'); background-size: cover; background-position: center; position: relative;">
-                               <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid white;"></div>
-                           </div>`,
-                    className: 'custom-pin', iconSize: [36, 44], iconAnchor: [18, 44], popupAnchor: [0, -44]
-                });
-            }
-
-            L.marker([f.lat, f.lng], { icon: activeIcon }).addTo(map)
-                .bindPopup(`<b style='color: #1b4332;'>🌿 ${f.username}</b>${streakText}${foodText}`);
-        }
-        
         if (f.lastActive === today || f.lastVerified === today || (currentStreak === 0 && !f.lastVerified)) {
             activeTodayCount++;
         }
@@ -569,10 +539,7 @@ function updateMarkers() {
     let offlineCount = feeders.length - activeTodayCount;
     if (offlineCount < 0) offlineCount = 0;
     document.getElementById("offlineCounter").innerText = offlineCount;
-    updateLeaderboard();
-}
-
-function updateLeaderboard() {
+    
     let list = document.getElementById("leaderboard");
     list.innerHTML = ""; 
     let sortedFeeders = [...feeders].sort((a, b) => (b.streak || 0) - (a.streak || 0)).slice(0, 5);
@@ -700,7 +667,7 @@ async function startApp() {
         currentUserData = feeders.find(f => f.deviceId === myDeviceId);
         
         if (!currentUserData) {
-            currentUserData = { deviceId: myDeviceId, username: savedUsername, food: "🌾 Seeds", profilePic: null, lat: 22.4707, lng: 70.0577, streak: 0, lastVerified: null, lastActive: today };
+            currentUserData = { deviceId: myDeviceId, username: savedUsername, food: "🌾 Seeds", profilePic: null, streak: 0, lastVerified: null, lastActive: today };
         } else {
             currentUserData.lastActive = today; 
             currentUserData.username = savedUsername; 
@@ -713,38 +680,30 @@ async function startApp() {
     }
     
     overlay.classList.add("active");
-    joinBtn.addEventListener("click", () => {
+    
+    // UPDATED: NO MORE LOCATION REQUESTS! INSTANT JOIN!
+    joinBtn.addEventListener("click", async () => {
         let username = document.getElementById("usernameInput").value.trim();
         let foodChoice = document.getElementById("foodInput").value;
         if(!username){ alert("Please enter a username!"); return; }
         
-        joinBtn.disabled = true; joinBtn.innerText = "Finding your location... 📍";
+        joinBtn.disabled = true; joinBtn.innerText = "Joining... 🌿";
         
-        if(navigator.geolocation){
-            navigator.geolocation.getCurrentPosition(async position => {
-                
-                currentUserData = { 
-                    deviceId: myDeviceId, 
-                    username: username, 
-                    food: foodChoice, 
-                    profilePic: selectedProfilePic, 
-                    lat: position.coords.latitude, 
-                    lng: position.coords.longitude, 
-                    streak: 0, 
-                    lastVerified: null, 
-                    lastActive: today 
-                };
-                
-                localStorage.setItem("currentUser", username);
-                await syncFeederData(); 
-                
-                updateWelcomeText(); setupLogout(); setupAIVerification(); overlay.classList.remove("active"); initMap(); startTimer();
-                setInterval(fetchAllFeeders, 30000);
-            }, () => { 
-                alert("Location permission is required to put you on the map."); 
-                joinBtn.disabled = false; joinBtn.innerText = "Join Community"; 
-            });
-        }
+        currentUserData = { 
+            deviceId: myDeviceId, 
+            username: username, 
+            food: foodChoice, 
+            profilePic: selectedProfilePic, 
+            streak: 0, 
+            lastVerified: null, 
+            lastActive: today 
+        };
+        
+        localStorage.setItem("currentUser", username);
+        await syncFeederData(); 
+        
+        updateWelcomeText(); setupLogout(); setupAIVerification(); overlay.classList.remove("active"); initMap(); startTimer();
+        setInterval(fetchAllFeeders, 30000);
     });
 }
 
